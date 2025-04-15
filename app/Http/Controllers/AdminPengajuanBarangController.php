@@ -1,116 +1,106 @@
-<?php
+<?php  
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use App\Models\AdminPengajuanBarang; // Pastikan model AdminPengajuanBarang sudah ada
-use Illuminate\Support\Facades\Session;
+use Illuminate\Http\Request;  // Ada typo di sini (HttpRequest seharusnya Http\Request)
+use App\Models\AdminPengajuanBarang;
+use Illuminate\Support\Facades\Log;
 
 class AdminPengajuanBarangController extends Controller
-{
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function index()
-    {
-        // Ambil semua data pengajuan barang
-        $AdminPengajuanBarang = AdminPengajuanBarang::all();
-        return view('admin.pengajuan.index', compact('AdminPengajuanBarang'));
-    }
 
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
+
+
+    {
+        public function index()
+        {
+            try {
+                $AdminPengajuanBarang = AdminPengajuanBarang::all();
+                return view('admin.pengajuan.index', compact('AdminPengajuanBarang'));
+            } catch (\Exception $e) {
+                Log::error("Error fetching pengajuan barang: " . $e->getMessage());
+                return back()->with('error', 'Terjadi kesalahan saat mengambil data.');
+            }
+        }
+
     public function create()
     {
-        // Tampilkan form untuk membuat pengajuan barang baru
         return view('admin.pengajuan.create');
     }
 
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
     public function store(Request $request)
     {
-        // Validasi input dari form
-        $request->validate([
-            'nama_barang' => 'required|string|max:255',
-            'jumlah' => 'required|integer',
-            'deskripsi' => 'nullable|string',
-        ]);
-
-        // Simpan pengajuan barang baru
-        AdminPengajuanBarang::create([
-            'nama_barang' => $request->nama_barang,
-            'jumlah' => $request->jumlah,
-            'deskripsi' => $request->deskripsi,
-        ]);
-
-        // Redirect dengan pesan sukses
-        return redirect()->route('admin.pengajuan.index')->with('success', 'Pengajuan barang berhasil ditambahkan.');
+        dd($request->all());
+        try {
+            $request->validate([
+                'nama_pengaju' => 'required|string|max:255',
+                'nama_barang' => 'required|string|max:255',
+                'tanggal_pengajuan' => 'required|date',
+                'qty' => 'required|integer|min:1',
+                'deskripsi' => 'nullable|string',
+            ]);
+    
+            AdminPengajuanBarang::create([
+                'nama_pengaju' => $request->nama_pengaju,
+                'nama_barang' => $request->nama_barang,
+                'tanggal_pengajuan' => $request->tanggal_pengajuan,
+                'qty' => $request->qty,
+                'deskripsi' => $request->deskripsi,
+                'terpenuhi' => false // Default value
+            ]);
+    
+            return redirect()->route('admin.pengajuan.index')
+                   ->with('success', 'Pengajuan barang berhasil ditambahkan.');
+        } catch (\Exception $e) {
+            Log::error("Error storing pengajuan barang: " . $e->getMessage());
+            return back()->withInput()
+                   ->with('error', 'Terjadi kesalahan saat menyimpan data.');
+        }
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
     public function edit($id)
     {
-        // Ambil data pengajuan barang berdasarkan id
-        $AdminPengajuanBarang = AdminPengajuanBarang::findOrFail($id);
-        return view('admin.pengajuan.edit', compact('AdminPengajuanBarang'));
+        try {
+            $AdminPengajuanBarang = AdminPengajuanBarang::findOrFail($id);
+            return view('admin.pengajuan.edit', compact('AdminPengajuanBarang'));
+        } catch (\Exception $e) {
+            Log::error("Error fetching pengajuan barang for edit: " . $e->getMessage());
+            return back()->with('error', 'Terjadi kesalahan saat mengambil data untuk diedit.');
+        }
     }
 
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
     public function update(Request $request, $id)
     {
-        // Validasi input dari form
-        $request->validate([
-            'nama_barang' => 'required|string|max:255',
-            'jumlah' => 'required|integer',
-            'deskripsi' => 'nullable|string',
-        ]);
+        try {
+            $request->validate([
+                'nama_barang' => 'required|string|max:255',
+                'jumlah' => 'required|integer',
+                'deskripsi' => 'nullable|string',
+            ]);
 
-        // Cari pengajuan barang berdasarkan id dan update datanya
-        $AdminPengajuanBarang = AdminPengajuanBarang::findOrFail($id);
-        $AdminPengajuanBarang->update([
-            'nama_barang' => $request->nama_barang,
-            'jumlah' => $request->jumlah,
-            'deskripsi' => $request->deskripsi,
-        ]);
+            $AdminPengajuanBarang = AdminPengajuanBarang::findOrFail($id);
+            $AdminPengajuanBarang->update([
+                'nama_barang' => $request->nama_barang,
+                'jumlah' => $request->jumlah,
+                'deskripsi' => $request->deskripsi,
+            ]);
 
-        // Redirect dengan pesan sukses
-        return redirect()->route('admin.pengajuan.index')->with('success', 'Pengajuan barang berhasil diupdate.');
+            return redirect()->route('admin.pengajuan.index')->with('success', 'Pengajuan barang berhasil diupdate.');
+        } catch (\Exception $e) {
+            Log::error("Error updating pengajuan barang: " . $e->getMessage());
+            return back()->with('error', 'Terjadi kesalahan saat mengupdate data.');
+        }
     }
 
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
     public function destroy($id)
     {
-        // Cari dan hapus pengajuan barang berdasarkan id
-        $AdminPengajuanBarang = AdminPengajuanBarang::findOrFail($id);
-        $AdminPengajuanBarang->delete();
+        try {
+            $AdminPengajuanBarang = AdminPengajuanBarang::findOrFail($id);
+            $AdminPengajuanBarang->delete();
 
-        // Redirect dengan pesan sukses
-        return redirect()->route('admin.pengajuan.index')->with('success', 'Pengajuan barang berhasil dihapus.');
+            return redirect()->route('admin.pengajuan.index')->with('success', 'Pengajuan barang berhasil dihapus.');
+        } catch (\Exception $e) {
+            Log::error("Error deleting pengajuan barang: " . $e->getMessage());
+            return back()->with('error', 'Terjadi kesalahan saat menghapus data.');
+        }
     }
 }

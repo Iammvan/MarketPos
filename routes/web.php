@@ -77,7 +77,9 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/pengajuan-barang', [AdminPengajuanBarangController::class, 'index'])->name('pengajuan.index');
 
     // Tambah, edit, hapus pengajuan
-    Route::post('/pengajuan-barang', [AdminPengajuanBarangController::class, 'store'])->name('pengajuan.store');
+    Route::resource('admin/pengajuan', AdminPengajuanBarangController::class);
+    Route::post('/pengajuan', [AdminPengajuanBarangController::class, 'store'])
+    ->name('admin.pengajuan.store');
     Route::get('/pengajuan-barang/{id}/edit', [AdminPengajuanBarangController::class, 'edit'])->name('pengajuan.edit');
     Route::put('/pengajuan-barang/{id}', [AdminPengajuanBarangController::class, 'update'])->name('pengajuan.update');
     Route::delete('/pengajuan-barang/{id}', [AdminPengajuanBarangController::class, 'destroy'])->name('pengajuan.destroy');

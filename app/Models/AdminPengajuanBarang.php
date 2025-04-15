@@ -9,26 +9,14 @@ class AdminPengajuanBarang extends Model
 {
     use HasFactory;
 
-    // Tabel yang digunakan oleh model
-    protected $table = 'pengajuan_barang'; // Nama tabel di database
+    protected $table = 'pengajuan_barang'; // Sesuaikan dengan nama tabel
     
-    // Kolom yang dapat diisi (mass assignment)
     protected $fillable = [
-        'nama_pengaju',       // Nama orang yang mengajukan
-        'nama_barang',        // Nama barang yang diajukan
-        'tanggal_pengajuan',  // Tanggal pengajuan barang
-        'qty',                // Jumlah barang
-        'terpenuhi',          // Status apakah pengajuan terpenuhi
-        'deskripsi'           // Deskripsi barang (jika ada)
+        'nama_pengaju',
+        'nama_barang',
+        'tanggal_pengajuan',
+        'qty',
+        'terpenuhi',
+        'deskripsi'
     ];
-
-    // Jika menggunakan timestamps, pastikan ini aktif
-    public $timestamps = true;
-
-    // Relasi, jika diperlukan
-    // Contoh: AdminPengajuanBarang bisa dimiliki oleh seorang User
-    // public function user()
-    // {
-    //     return $this->belongsTo(User::class);
-    // }
 }
